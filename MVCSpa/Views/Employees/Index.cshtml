@@ -1,0 +1,221 @@
+﻿@using PagedList.Mvc;
+@using PagedList;
+@model IPagedList<MVCSpa.Models.Employee>
+
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Employee List</h2>
+
+<div id="employee-app">
+    <div>
+        <button id="btnCreate" class="btn btn-success float-end mb-2">Add New Employee</button>
+    </div>
+    @using (Html.BeginForm("Index", "Employees", FormMethod.Get))
+    {
+        <p>
+            @Html.TextBox("SearchString", ViewBag.CurrentFilter as string)
+            <input type="submit" value="Search" />
+        </p>
+    }
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>
+                    @Html.ActionLink("Employee Name", "Index", new
+                    {
+                        sortOrder =
+                         ViewBag.NameSortParm
+                    })
+                </th>
+                <th>
+                    @Html.ActionLink("Joiningn Date", "Index", new
+                    {
+                        sortOrder =
+                         ViewBag.DateSortParm
+                    })
+                </th>
+                <th>Mobile No</th>
+                <th>Salary</th>
+                <th>Department</th>
+                <th>Permanent?</th>
+                <th>Academic</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="employee-list-body">
+            @foreach (var e in Model)
+            {
+                <tr data-employee-id="@e.EmployeeId">
+                    <td>
+                        <img src="@Url.Content("~/images/" + e.ImageUrl)" height="100" />
+                    </td>
+                    <td>@e.EmployeeName</td>
+                    <td>@e.JoiningDate.ToString("yyyy-MM-dd")</td>
+                    <td>@e.MobileNo</td>
+                    <td>@e.Salary</td>
+                    <td>@e.Department.DepartmentName</td>
+                    <td>@(e.IsPermanent ? "Permanent" : "Not Permanent")</td>
+                    <td>
+                        <ul>
+                            @foreach (var a in e.AcademicDetails)
+                            {
+                                <li>@a.DegreeName : @a.CGPA</li>
+                            }
+                        </ul>
+                    </td>
+                    <td>
+                        <a class="btn btn-primary btn-sm edit-btn"
+                           href="@Url.Action("EditPartial", "Employees", new { id = e.EmployeeId })">Edit</a>
+                        <button class="btn btn-danger btn-sm delete-btn"
+                                data-employee-id="@e.EmployeeId"
+                                data-employee-name="@e.EmployeeName">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+
+    <br />
+    Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of
+    @Model.PageCount
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+        new
+        {
+            page,
+            sortOrder = ViewBag.CurrentSort,
+            currentFilter =
+        ViewBag.CurrentFilter
+        }))
+</div>
+
+<div id="modalContainer"></div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+
+            $("#btnCreate").click(function () {
+                $.get('@Url.Action("CreatePartial", "Employees")', function (data) {
+                    showModal(data);
+                    parseDynamicForm();
+                    attachModalEventListeners();
+                });
+            });
+
+            $('#employee-list-body').on('click', '.edit-btn', function (e) {
+                e.preventDefault();
+
+                var editUrl = $(this).attr('href');
+                var employeeId = $(this).closest('tr').data('employee-id');
+
+                $.get(editUrl, function (data) {
+                    showModal(data);
+                    parseDynamicForm();
+                    attachModalEventListeners("Edit", employeeId);
+                });
+            });
+
+            $('#employee-list-body').on('click', '.delete-btn', function () {
+                var employeeId = $(this).data('employee-id');
+                var employeeName = $(this).data('employee-name');
+
+                if (confirm('Are you sure you want to delete ' + employeeName + '?')) {
+                    $.post('@Url.Action("DeleteEmployee", "Employees")', { id: employeeId })
+                        .done(function (response) {
+                            if (response.success) {
+                                window.location.reload();
+                            } else {
+                                alert('Error deleting employee: ' + response.message);
+                            }
+                        })
+                        .fail(function () {
+                            alert('An error occurred while deleting the employee.');
+                        });
+                }
+            });
+
+            function showModal(data) {
+                $("#modalContainer").html(
+                    '<div class="modal fade show" style="display:block;" aria-modal="true" role="dialog">' +
+                        '<div class="modal-dialog modal-lg">' +
+                            '<div class="modal-content">' + data + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="modal-backdrop fade show"></div>'
+                );
+            }
+
+            function parseDynamicForm() {
+                var form = $("#modalContainer").find("form");
+                form.removeData("validator");
+                form.removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse(form);
+            }
+
+            function attachModalEventListeners(action, employeeId) {
+                action = action || "Create";
+                employeeId = employeeId || null;
+
+                $(document)
+                    .off("click", ".modal-backdrop, .modal .btn-secondary")
+                    .on("click", ".modal-backdrop, .modal .btn-secondary", function () {
+                        $("#modalContainer").empty();
+                    });
+
+                $(document)
+                    .off("submit", "#createEmployeeForm, #editEmployeeForm")
+                    .on("submit", "#createEmployeeForm, #editEmployeeForm", function (e) {
+                        e.preventDefault();
+
+                        var form = $(this);
+
+                        if (!form.valid()) {
+                            return false;
+                        }
+
+                        var formData = new FormData(this);
+                        var url = '@Url.Action("CreateEmployee", "Employees")';
+
+                        if (form.attr('id') === "editEmployeeForm" && action === "Edit") {
+                            url = '@Url.Action("EditEmployee", "Employees")';
+
+                            if (employeeId) {
+                                formData.set("EmployeeId", employeeId);
+                            }
+                        }
+
+                        $.ajax({
+                            url: url,
+                            type: 'POST',
+                            data: formData,
+                            contentType: false,
+                            processData: false,
+                            success: function (response) {
+                                if (typeof response === "object" && response.success) {
+                                    $("#modalContainer").empty();
+                                    window.location.reload();
+                                } else {
+                                    $("#modalContainer .modal-content").html(response);
+                                    parseDynamicForm();
+                                    attachModalEventListeners(action, employeeId);
+                                }
+                            },
+                            error: function (xhr) {
+                                alert("Error performing operation.");
+                                console.log(xhr.responseText);
+                            }
+                        });
+                    });
+            }
+
+        });
+    </script>
+}

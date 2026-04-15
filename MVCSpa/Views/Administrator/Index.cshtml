@@ -1,0 +1,26 @@
+﻿@model IEnumerable<MVCSpa.Models.tblRole>
+
+@{
+    ViewBag.Title = "Role List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Role List</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Role Name</th>
+            <th>User</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.RoleName</td>
+                <td>@(item.tblUser != null ? item.tblUser.UserName : "No User Found")</td>
+            </tr>
+        }
+    </tbody>
+</table>

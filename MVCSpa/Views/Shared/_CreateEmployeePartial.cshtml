@@ -1,0 +1,111 @@
+﻿@model MVCSpa.ViewModels.EmployeeViewModel
+<div class="modal-header">
+    <h5 class="modal-title">Add New Employee</h5>
+</div>
+<div class="modal-body">
+    @using (Html.BeginForm("CreateEmployee", "Employees", FormMethod.Post, new { id = "createEmployeeForm", enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="row">
+            <div class="col-md-7">
+                <h4> Employee Information</h4>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.EmployeeName, htmlAttributes: new { @class = "control-label col-md-3" })
+                    @Html.EditorFor(model => model.EmployeeName, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.EmployeeName, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.JoiningDate, htmlAttributes: new { @class = "control-label col-md-3" })
+                    @Html.EditorFor(model => model.JoiningDate, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.JoiningDate, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.MobileNo, htmlAttributes: new { @class = "control-label col-md-3" })
+                    @Html.EditorFor(model => model.MobileNo, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.MobileNo, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.Salary, htmlAttributes: new { @class = "control-label col-md-3" })
+                   
+                    @Html.EditorFor(model => model.Salary, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.Salary, "", new { @class = "text-danger" })
+                   
+                </div>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.IsPermanent, htmlAttributes: new { @class = "control-label col-md-3" })
+                    @Html.EditorFor(model => model.IsPermanent)
+                    @Html.ValidationMessageFor(model => model.IsPermanent, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-2">
+                    @Html.LabelFor(model => model.DepartmentId, htmlAttributes: new { @class = "control-label col-md-3" })
+                    @Html.DropDownListFor(model => model.DepartmentId, new SelectList(Model.Departments, "DepartmentId", "DepartmentName"), "Select Course", new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group mb-2">
+                    <img id="imageFile" src="~/images/noimage.png" alt="image" width="100" /><br />
+                    @Html.LabelFor(model => model.ProfileFile, htmlAttributes: new { @class = "control-label col-md-3" })
+                    <input onchange="readUrl(this)" type="file" name="ProfileFile" id="ProfileFile" class="invisible" />
+                </div>
+            </div>
+            <div class="col-md-5">
+                <h4> Academic Information</h4>
+                <button onclick="AddAcademic()" type="button" class="btn btn-warning mb-2">Add Academic</button>
+                @Html.Partial("_AddAcademics", Model.AcademicDetails)
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Create Employee</button>
+        </div>
+    }
+</div>
+@*<script src="~/Scripts/jquery-3.7.1.min.js"></script>*@
+
+<script>
+    function readUrl(i) {
+        if (i.files && i.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $("#imageFile").attr('src', e.target.result)
+            }
+            reader.readAsDataURL(i.files[0]);
+        }
+    }
+    function deleteRow(btn) {
+        $(btn).closest('tr').remove();
+        updateAcademicDetailIndex();
+    }
+    function AddAcademic() {
+        var lastIndex = parseInt($('#HIndex').val());
+        var newRow = `
+        <tr>
+            <td>
+                <input type="text" value="" class="form-control" name="AcademicDetails[${lastIndex}].DegreeName" />
+            </td>
+            <td>
+                <input type="text" value="" class="form-control" name="AcademicDetails[${lastIndex}].CGPA" />
+            </td>
+            <td>
+                <button onclick="deleteRow(this)" type="button" class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+        `
+        $("#ExTable tbody").append(newRow);
+        $('#HIndex').val(lastIndex + 1);
+        updateAcademicDetailIndex();
+    }
+  
+    
+    function updateAcademicDetailIndex() {
+        $("#ExTable tbody tr").each(function (index) {
+            $(this).find("input[name^='AcademicDetails']").each(function () {
+                var name = $(this).attr("name");
+                name = name.replace(/AcademicDetails\[\d+\]/, "AcademicDetails[" + index + "]");
+                $(this).attr("name", name)
+            })
+        })
+    }
+
+</script>

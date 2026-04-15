@@ -1,0 +1,83 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="welcome-section mb-4">
+    <h2 class="display-5 text-primary">
+        <i class="fas fa-hand-sparkles"></i>
+        Hello, @(User.Identity.IsAuthenticated ? User.Identity.Name : "Guest")!
+    </h2>
+    <p class="lead text-muted">Your central hub for workforce management and analytics</p>
+</div>
+
+<div class="container mt-4">
+    <div class="bg-primary text-white text-center p-5 rounded-3 shadow">
+        <h1 class="display-4 fw-bold">EMPLOYEE MANAGEMENT SYSTEM</h1>
+        <p class="lead">Efficiently manage your organization's workforce.</p>
+        <a href="@Url.Action("Index", "Employees")" class="btn btn-outline-light btn-lg">Go to Employee List</a>
+    </div>
+
+
+    <div class="mt-4">
+
+    </div>
+
+    <div class="card shadow border-0 overflow-hidden">
+        <div class="row g-0">
+            <div class="col-md-5 bg-dark text-white p-5 d-flex flex-column justify-content-center">
+                <h2 class="display-5 fw-bold">Employee Presentation</h2>
+                <p class="mt-4">Presented by: Sumaiya Akter</p>
+                <a href="@Url.Action("Index", "Employees")" class="btn btn-info mt-3 w-50">View Employees</a>
+            </div>
+            <div class="col-md-7">
+                <img src="~/images/EmployeePic.png" class="img-fluid w-100 h-100" style="object-fit: cover;" alt="Presentation">
+            </div>
+        </div>
+    </div>
+    <div class="row text-center mt-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white shadow-sm p-4 border-0">
+                <i class="fas fa-users fa-2x mb-2"></i> <h4>Total Employees</h4>
+                <h2>15</h2>
+            </div>
+        </div>
+        @*<div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm p-4 border-0">
+                <i class="fas fa-building fa-2x mb-2"></i>
+                <h4>Departments</h4>
+                <h2>5</h2>
+            </div>
+        </div>*@
+
+        <div class="col-md-4">
+            <div class="card bg-success text-white shadow-sm p-4 border-0 h-100">
+                <i class="fas fa-building fa-2x mb-2"></i>
+                <h4 class="fw-bold">Departments</h4>
+
+                <div class="mt-3">
+                    @Html.DropDownList("DeptList", (IEnumerable<SelectListItem>)ViewBag.Departments, "-- View Departments --", new { @class = "form-select form-select-sm border-0 text-dark mb-3" })
+                  
+                </div>
+
+                <div class="d-grid mt-2">
+                    <a href="@Url.Action("Create", "Departments1")" class="btn btn-light btn-sm fw-bold shadow-sm text-success">
+                        <i class="fas fa-plus-circle"></i> Add New Department
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white shadow-sm p-4 border-0">
+                <i class="fas fa-user-tag fa-2x mb-2"></i>
+                <h4>Active Roles</h4>
+                <h2>3</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

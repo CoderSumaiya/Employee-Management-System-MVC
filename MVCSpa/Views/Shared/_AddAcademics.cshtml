@@ -1,0 +1,30 @@
+﻿@model List<MVCSpa.Models.AcademicDetail>
+<table id="ExTable" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Degree Name</th>
+            <th>CGPA</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            <tr>
+                <td>
+                   
+                    <input type="text" value="@Model[i].DegreeName" class="form-control" name="AcademicDetails[@i].DegreeName" />
+                </td>
+                <td>
+                    <input type="text" value="@Model[i].CGPA" class="form-control" name="AcademicDetails[@i].CGPA" />
+                </td>
+                <td>
+                    <button onclick="deleteRow(this)" type="button" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<input type="hidden" id="HIndex" value="@Model.Count" />
+
+
